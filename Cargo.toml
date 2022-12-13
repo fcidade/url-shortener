@@ -3,13 +3,13 @@ name = "shortener"
 version = "0.1.0"
 edition = "2021"
 
-[lib]
-
 [dependencies]
 axum = "0.6.1"
 nanoid = "0.4.0"
 serde = { version = "1.0.15", features = ["derive"] }
-shuttle-service = { version = "0.8.0", features = ["web-axum"] }
 sync_wrapper = "0.1.1"
+tokio = { version = "1.23.0", features = ["full"] }
+tracing = "0.1.37"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

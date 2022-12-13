@@ -1,20 +1,36 @@
+use std::net::SocketAddr;
+
 use axum::{
+    http::StatusCode,
+    response::IntoResponse,
     routing::{get, post},
-    Router, Json, http::StatusCode, response::IntoResponse,
+    Json, Router,
 };
 use nanoid::nanoid;
-use sync_wrapper::SyncWrapper;
 
-#[shuttle_service::main]
-async fn main() -> shuttle_service::ShuttleAxum {
+#[tokio::main]
+async fn main() {
+    // pool.execute(include_str!("../schema.sql"))
+    //     .await
+    //     .unwrap();
+    let port = std::env::var("PORT").ok().and_then(|s| s.parse().ok()).unwrap_or(3000);
+
+    tracing_subscriber::fmt::init();
+
     let app = Router::new()
         .route("/healthcheck", get(healthcheck))
         .route("/version", get(version))
         .route("/u/:id", get(redirect_url))
         .route("/shorten", post(shorten_url));
 
-    let sync_wrapper = SyncWrapper::new(app);
-    Ok(sync_wrapper)
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
+    println!("listening on: {}", addr);
+    tracing::debug!("listening on: {}", addr);
+
+    axum::Server::bind(&addr)
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 }
 
 async fn healthcheck() -> &'static str {
@@ -31,7 +47,7 @@ async fn shorten_url(Json(payload): Json<shorten_url::Request>) -> impl IntoResp
     let generated_id = nanoid!(6);
     // Save into database
     // Return generated uri
-    let response_body = shorten_url::Response{
+    let response_body = shorten_url::Response {
         generated_id: generated_id.clone(),
         uri: format!("/u/{}", generated_id),
     };
