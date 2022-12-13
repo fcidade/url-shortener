@@ -1,27 +1,40 @@
-use std::net::SocketAddr;
+use std::{env, fs, net::SocketAddr};
 
 use axum::{
-    http::StatusCode,
-    response::IntoResponse,
     routing::{get, post},
-    Json, Router,
+    Router,
 };
-use nanoid::nanoid;
+use sqlx::{mysql::MySqlPoolOptions, Executor};
+
+mod redirect_url;
+mod shorten_url;
 
 #[tokio::main]
 async fn main() {
-    // pool.execute(include_str!("../schema.sql"))
-    //     .await
-    //     .unwrap();
-    let port = std::env::var("PORT").ok().and_then(|s| s.parse().ok()).unwrap_or(3000);
+    dotenv::dotenv().ok();
+
+    let port = std::env::var("PORT")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(3000);
 
     tracing_subscriber::fmt::init();
+
+    let pool = MySqlPoolOptions::new()
+        .max_connections(5)
+        .connect(env::var("DATABASE_URL").ok().unwrap().as_str())
+        .await
+        .unwrap();
+
+    let schema = fs::read_to_string("./schema.sql").expect("could not load database schema");
+    pool.execute(schema.as_str()).await.unwrap();
 
     let app = Router::new()
         .route("/healthcheck", get(healthcheck))
         .route("/version", get(version))
-        .route("/u/:id", get(redirect_url))
-        .route("/shorten", post(shorten_url));
+        .route("/u/:id", get(redirect_url::handler))
+        .route("/shorten", post(shorten_url::handler))
+        .with_state(pool);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     println!("listening on: {}", addr);
@@ -39,32 +52,4 @@ async fn healthcheck() -> &'static str {
 
 async fn version() -> &'static str {
     env!("CARGO_PKG_VERSION")
-}
-
-async fn redirect_url() {}
-
-async fn shorten_url(Json(payload): Json<shorten_url::Request>) -> impl IntoResponse {
-    let generated_id = nanoid!(6);
-    // Save into database
-    // Return generated uri
-    let response_body = shorten_url::Response {
-        generated_id: generated_id.clone(),
-        uri: format!("/u/{}", generated_id),
-    };
-    (StatusCode::CREATED, Json(response_body))
-}
-
-mod shorten_url {
-    use serde::{Deserialize, Serialize};
-
-    #[derive(Deserialize)]
-    pub struct Request {
-        pub url: String,
-    }
-
-    #[derive(Serialize)]
-    pub struct Response {
-        pub generated_id: String,
-        pub uri: String,
-    }
 }
