@@ -4,6 +4,9 @@ FROM rust:1.65-slim-buster as build
 RUN USER=root cargo new --bin shortener
 WORKDIR /shortener
 
+RUN apt update
+RUN apt install -y --no-install-recommends openssl pkg-config
+
 # copy over your manifests
 COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml

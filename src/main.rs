@@ -18,8 +18,6 @@ async fn main() {
         .and_then(|s| s.parse().ok())
         .unwrap_or(3000);
 
-    tracing_subscriber::fmt::init();
-
     let pool = MySqlPoolOptions::new()
         .max_connections(5)
         .connect(env::var("DATABASE_URL").ok().unwrap().as_str())
@@ -38,7 +36,6 @@ async fn main() {
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     println!("listening on: {}", addr);
-    tracing::debug!("listening on: {}", addr);
 
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
