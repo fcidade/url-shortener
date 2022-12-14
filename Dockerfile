@@ -12,6 +12,7 @@ RUN cargo clean
 # copy over your manifests
 COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
+COPY ./sqlx-data.json ./sqlx-data.json
 
 # this build step will cache your dependencies
 RUN cargo build --release
