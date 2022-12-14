@@ -1,0 +1,28 @@
+{
+  "db": "MySQL",
+  "5f10f6fd9fca55731440e2bca2593ea88b1009010c42dc505cec8efe19f078d4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "url",
+          "ordinal": 0,
+          "type_info": {
+            "char_set": 224,
+            "flags": {
+              "bits": 4097
+            },
+            "max_size": 1024,
+            "type": "VarString"
+          }
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "select url from shortened_urls where id = ?"
+  }
+}

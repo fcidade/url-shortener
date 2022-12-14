@@ -5,7 +5,9 @@ RUN USER=root cargo new --bin shortener
 WORKDIR /shortener
 
 RUN apt update
-RUN apt install -y --no-install-recommends openssl pkg-config
+RUN apt install -y --no-install-recommends openssl libssl-dev pkg-config
+
+RUN cargo clean
 
 # copy over your manifests
 COPY ./Cargo.lock ./Cargo.lock

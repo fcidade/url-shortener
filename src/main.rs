@@ -1,10 +1,10 @@
-use std::{env, fs, net::SocketAddr};
+use std::{env, net::SocketAddr};
 
 use axum::{
     routing::{get, post},
     Router,
 };
-use sqlx::{mysql::MySqlPoolOptions, Executor};
+use sqlx::{mysql::MySqlPoolOptions};
 
 mod redirect_url;
 mod shorten_url;
@@ -23,9 +23,6 @@ async fn main() {
         .connect(env::var("DATABASE_URL").ok().unwrap().as_str())
         .await
         .unwrap();
-
-    let schema = fs::read_to_string("./schema.sql").expect("could not load database schema");
-    pool.execute(schema.as_str()).await.unwrap();
 
     let app = Router::new()
         .route("/healthcheck", get(healthcheck))
