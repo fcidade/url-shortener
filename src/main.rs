@@ -20,7 +20,7 @@ async fn main() {
 
     let pool = MySqlPoolOptions::new()
         .max_connections(5)
-        .connect(env::var("DATABASE_URL").ok().unwrap().as_str())
+        .connect(env::var("DATABASE_URL").ok().expect("DATABASE_URL should not be empty").as_str())
         .await
         .unwrap();
 

@@ -31,5 +31,8 @@ FROM debian:buster-slim
 # copy the build artifact from the build stage
 COPY --from=build /shortener/target/release/shortener .
 
+RUN apt update
+RUN apt install -y --no-install-recommends openssl
+
 # set the startup command to run your binary
 CMD ["./shortener"]
